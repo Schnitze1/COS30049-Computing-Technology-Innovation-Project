@@ -5,7 +5,6 @@ from evaluation.calc_eval_metrics import evaluate_models
 from evaluation.create_reports import export_all
 import numpy as np
 import pickle
-from utils.model_io import save_models
 
 DATA_PATH = 'data_prerprocessing/output'
 
@@ -34,9 +33,8 @@ def parse_args():
 
 
 def main():
-    for dir in ['cache/models', 'evaluation_reports']:
-        os.makedirs(dir, exist_ok=True)
-        
+    os.makedirs('evaluation_reports', exist_ok=True)
+    
     args = parse_args()
     X_train, X_test, y_train, y_test = load_dataset(args.data)
     
@@ -44,8 +42,6 @@ def main():
     # _ = load_feature_metadata(args.features)
     
     models = train_baseline_models(X_train, y_train)
-    # Save trained models for later inference
-    save_models(models, out_dir='cache/models')
     
     results = evaluate_models(models, X_test, y_test)
     for name, metrics in results.items():
