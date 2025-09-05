@@ -21,6 +21,22 @@ def load_model(name: str, out_dir: str = "cache/models") -> object:
     raise FileNotFoundError(f"Model '{name}' not found in {out_dir}")
 
 
+def load_models(out_dir: str = "cache/models") -> Dict[str, object]:
+    """Load all models from the cache directory"""
+    models = {}
+    if not os.path.exists(out_dir):
+        return models
+    
+    for fname in os.listdir(out_dir):
+        if fname.endswith(".joblib"):
+            name = fname[:-7]  # Remove .joblib extension
+            try:
+                models[name] = load_model(name, out_dir)
+            except Exception as e:
+                print(f"Warning: Could not load model '{name}': {e}")
+    
+    return models
+
 def list_models(out_dir: str = "cache/models") -> Dict[str, str]:
     if not os.path.exists(out_dir):
         return {}
