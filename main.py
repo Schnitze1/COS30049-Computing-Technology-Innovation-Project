@@ -1,6 +1,6 @@
 
 import os
-from evaluation.create_reports import export_multiclass_all
+from evaluation.create_reports import export_multiclass_all, plot_kmeans_pca_scatter, plot_cluster_label_heatmap
 import numpy as np
 import pickle
 from utils.model_io import save_models, load_models
@@ -9,12 +9,13 @@ from evaluation.calc_eval_metrics import evaluate_models, print_results, calcula
 DATA_PATH = 'data_preprocessing/output'
 
 def load_dataset(npz_path: str = f'{DATA_PATH}/processed_data.npz'):
-	data = np.load(npz_path)
-	X_train = data['X_train']
-	X_test = data['X_test']
-	y_train = data['y_train']
-	y_test = data['y_test']
-	return X_train, X_test, y_train, y_test
+    data = np.load(npz_path)
+    X_train_unsupervised = data['X_train_unSMOTE']  # Original X_train before SMOTE for unsupervised learning
+    X_train = data['X_train']
+    X_test = data['X_test']
+    y_train = data['y_train']
+    y_test = data['y_test']
+    return X_train_unsupervised, X_train, X_test, y_train, y_test
 
 
 def load_feature_metadata(pickle_path: str = f'{DATA_PATH}/feature_metadata.pkl'):
@@ -31,8 +32,9 @@ def run_multiclass_classification():
     print("MULTICLASS CLASSIFICATION MODE")
     print("="*60)
     
-    # Load multiclass dataset
-    X_train, X_test, y_train, y_test = load_dataset(f'{DATA_PATH}/processed_data.npz')
+    # Load supervised dataset (SMOTE-augmented for supervised models, raw samples for unsupervised models)
+    X_train_unsupervised, X_train_supervised, X_test, y_train_supervised, y_test = load_dataset(f'{DATA_PATH}/processed_data.npz')
+    
     metadata = load_feature_metadata(f'{DATA_PATH}/feature_metadata.pkl')
     
     if metadata is None:
@@ -43,7 +45,9 @@ def run_multiclass_classification():
     traffic_types = metadata['label_encoder'].classes_
     n_classes = len(traffic_types)
     
-    print(f"Dataset loaded: {X_train.shape[0]} training samples, {X_test.shape[0]} test samples")
+    print(f"Supervised dataset (SMOTE): {X_train_supervised.shape[0]} training samples")
+    print(f"Unsupervised dataset (unsmote): {X_train_unsupervised.shape[0]} training samples")
+    print(f"Test dataset: {X_test.shape[0]} test samples")
     print(f"Traffic Types: {traffic_types}")
     
     # Try to load cached models first
@@ -51,7 +55,7 @@ def run_multiclass_classification():
     
     if not models:
         print("No cached models found. Training new models...")
-        models = train_models(X_train, y_train, n_classes)
+        models = train_models(X_train_supervised, y_train_supervised, X_train_unsupervised, n_classes)
         save_models(models, out_dir='cache/models')
         print("Models trained and saved to cache.")
     else:
@@ -62,7 +66,7 @@ def run_multiclass_classification():
         if missing_models:
             print(f"Missing models: {missing_models}. Training missing models...")
             # Train only missing models
-            missing_models_dict = train_models(X_train, y_train, n_classes)
+            missing_models_dict = train_models(X_train_supervised, y_train_supervised, X_train_unsupervised, n_classes)
             for model_name in missing_models:
                 if model_name in missing_models_dict:
                     models[model_name] = missing_models_dict[model_name]
@@ -76,8 +80,22 @@ def run_multiclass_classification():
     label_metrics = calculate_label_metrics(models, X_test, y_test, traffic_types)
     print_label_results(label_metrics)
     
-    # Export comprehensive multiclass reports (including derived label metrics)
+    # Export the overall summary
     paths = export_multiclass_all(results, traffic_types, label_metrics, out_dir='evaluation_reports')
+
+    # Kmean plots for limitations explanation
+    if 'kmeans' in models:
+        try:
+            kmeans = models['kmeans']
+            y_clusters = kmeans.predict(X_test)
+            
+            # Plot PCA by cluster and cluster-label heatmap
+            pca_paths = plot_kmeans_pca_scatter(X_test, y_test, y_clusters, traffic_types, out_dir='evaluation_reports/clustering')
+            # Drop the label-colored PCA from the returned dict to keep focus tight
+            paths['KMeans PCA by Cluster'] = pca_paths['KMeans PCA by Cluster']
+            paths['Cluster-Label Heatmap'] = plot_cluster_label_heatmap(y_clusters, y_test, traffic_types, out_dir='evaluation_reports/clustering')
+        except Exception as e:
+            print(f"Warning: Could not create K-Means PCA plots: {e}")
 
     print('\nMulticlass classification artifacts saved to:')
     for artifact_name, path in paths.items():
@@ -85,7 +103,7 @@ def run_multiclass_classification():
 
 def main():
     # Create necessary directories
-    for dir in ['cache/models', 'evaluation_reports', 'output']:
+    for dir in ['cache/models', 'evaluation_reports', 'evaluation_reports/multiclass', 'evaluation_reports/binary_label', 'evaluation_reports/clustering']:
         os.makedirs(dir, exist_ok=True)
     
     run_multiclass_classification()

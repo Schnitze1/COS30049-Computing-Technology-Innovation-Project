@@ -12,6 +12,15 @@ from sklearn.metrics import (
 )
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
+from sklearn.pipeline import Pipeline
+
+def _get_underlying_kmeans(model):
+    """Return (estimator, is_pipeline) where estimator is a KMeans and may be inside a Pipeline."""
+    if isinstance(model, KMeans):
+        return model, False
+    if isinstance(model, Pipeline) and 'kmeans' in model.named_steps and isinstance(model.named_steps['kmeans'], KMeans):
+        return model.named_steps['kmeans'], True
+    return None, False
 
 def kmeans_eval(km_model, X, y_true):
     """
@@ -22,7 +31,9 @@ def kmeans_eval(km_model, X, y_true):
 
     # Majority vote: for each cluster, pick the most frequent y_true
     mapping = {}
-    n_clusters = km_model.n_clusters
+    # Try to get n_clusters from estimator; fall back to unique cluster count
+    est, _ = _get_underlying_kmeans(km_model)
+    n_clusters = est.n_clusters if est is not None else int(np.max(clusters) + 1)
     for c in range(n_clusters):
         idx = np.where(clusters == c)[0]
         if len(idx) == 0:
@@ -46,15 +57,20 @@ def evaluate_models(models: Dict[str, object], X_test, y_test, n_classes: int) -
     for name, model in models.items():
         print(f"Evaluating {name}...")
         
-        if name == 'kmeans':  # Unsupervised: clustering with multiclass evaluation
+        # Detect KMeans or Pipeline-with-KMeans only (variants removed)
+        is_kmeans = isinstance(model, KMeans) or (isinstance(model, Pipeline) and 'kmeans' in getattr(model, 'named_steps', {}))
+        if is_kmeans:  # Unsupervised: clustering with multiclass evaluation
             y_pred = model.predict(X_test)
             
             # Traditional clustering metrics
+            # Access inertia from underlying KMeans if inside pipeline
+            est, _ = _get_underlying_kmeans(model)
+            inertia_val = float(est.inertia_) if est is not None and hasattr(est, 'inertia_') else float('nan')
             clustering_metrics = {
                 'silhouette': float(silhouette_score(X_test, y_pred)),
                 'calinski_harabasz': float(calinski_harabasz_score(X_test, y_pred)),
                 'davies_bouldin': float(davies_bouldin_score(X_test, y_pred)),
-                'inertia': float(model.inertia_),
+                'inertia': inertia_val,
             }
             
             # Multiclass evaluation using majority vote with the trained model
@@ -148,7 +164,12 @@ def calculate_label_metrics(models: Dict[str, object], X_test, y_test, traffic_t
     
     for model_name, model in models.items():
         # Predict Traffic Type for this model
-        y_pred_type = model.predict(X_test)
+        is_kmeans = isinstance(model, KMeans) or (isinstance(model, Pipeline) and 'kmeans' in getattr(model, 'named_steps', {}))
+        if is_kmeans:
+            # Map clusters to class indices using majority vote
+            y_pred_type, _ = kmeans_eval(model, X_test, y_test)
+        else:
+            y_pred_type = model.predict(X_test)
         
         # Map indices -> names
         y_pred_names = [classes[i] for i in y_pred_type]
