@@ -1,0 +1,211 @@
+{
+  "timestamp": "2025-09-18T23:55:22.882943",
+  "dataset_info": {
+    "original_shape": [
+      5288,
+      45
+    ],
+    "after_correlation_cleanup": [
+      5301,
+      52
+    ],
+    "final_shape": [
+      5288,
+      45
+    ],
+    "dropped_correlation_features": [
+      "Total Length of Fwd Packet",
+      "Fwd Packet Length Min",
+      "Fwd Packet Length Mean",
+      "Flow IAT Max",
+      "Flow IAT Min",
+      "Fwd IAT Total",
+      "Fwd IAT Mean",
+      "Fwd IAT Std",
+      "Fwd IAT Max",
+      "Fwd IAT Min",
+      "Bwd IAT Min",
+      "Bwd Header Length",
+      "Fwd Packets/s",
+      "Packet Length Min",
+      "Packet Length Max",
+      "Packet Length Mean",
+      "Packet Length Variance",
+      "PSH Flag Count",
+      "ACK Flag Count",
+      "URG Flag Count",
+      "Average Packet Size",
+      "Fwd Segment Size Avg",
+      "Bwd Segment Size Avg",
+      "Bwd Bytes/Bulk Avg",
+      "Bwd Packet/Bulk Avg",
+      "Subflow Bwd Packets",
+      "Subflow Bwd Bytes",
+      "Fwd Act Data Pkts",
+      "Active Max",
+      "Active Min",
+      "Idle Mean",
+      "Idle Std",
+      "Idle Max",
+      "Idle Min"
+    ],
+    "dropped_columns": [
+      "Src IP",
+      "Src Port",
+      "Dst IP",
+      "Dst Port",
+      "Timestamp",
+      "Label",
+      "Traffic Subtype"
+    ]
+  },
+  "feature_selection": {
+    "total_features_analyzed": 44,
+    "selected_features_count": 15,
+    "top_features": [
+      "Protocol",
+      "Total Length of Bwd Packet",
+      "Bwd Packet Length Std",
+      "Flow Packets/s",
+      "Flow IAT Mean",
+      "Flow Bytes/s",
+      "Subflow Fwd Bytes",
+      "Bwd Packets/s",
+      "Bwd Init Win Bytes",
+      "Bwd URG Flags",
+      "Flow Duration",
+      "Fwd Seg Size Min",
+      "Subflow Fwd Packets",
+      "Fwd Header Length",
+      "Total Fwd Packet"
+    ],
+    "feature_importance_scores": [
+      {
+        "feature_index": 1,
+        "feature_name": "Protocol",
+        "importance": 0.06569601494289709
+      },
+      {
+        "feature_index": 5,
+        "feature_name": "Total Length of Bwd Packet",
+        "importance": 0.0551668517351882
+      },
+      {
+        "feature_index": 11,
+        "feature_name": "Bwd Packet Length Std",
+        "importance": 0.05139514086197217
+      },
+      {
+        "feature_index": 13,
+        "feature_name": "Flow Packets/s",
+        "importance": 0.049332664484875395
+      },
+      {
+        "feature_index": 14,
+        "feature_name": "Flow IAT Mean",
+        "importance": 0.04626697902668583
+      },
+      {
+        "feature_index": 12,
+        "feature_name": "Flow Bytes/s",
+        "importance": 0.0461953607775429
+      },
+      {
+        "feature_index": 38,
+        "feature_name": "Subflow Fwd Bytes",
+        "importance": 0.042153593740667905
+      },
+      {
+        "feature_index": 25,
+        "feature_name": "Bwd Packets/s",
+        "importance": 0.038340913788457255
+      },
+      {
+        "feature_index": 40,
+        "feature_name": "Bwd Init Win Bytes",
+        "importance": 0.03674707299771368
+      },
+      {
+        "feature_index": 23,
+        "feature_name": "Bwd URG Flags",
+        "importance": 0.03662579478009301
+      },
+      {
+        "feature_index": 2,
+        "feature_name": "Flow Duration",
+        "importance": 0.034753718021348474
+      },
+      {
+        "feature_index": 41,
+        "feature_name": "Fwd Seg Size Min",
+        "importance": 0.030697927049967783
+      },
+      {
+        "feature_index": 37,
+        "feature_name": "Subflow Fwd Packets",
+        "importance": 0.029257932953613057
+      },
+      {
+        "feature_index": 24,
+        "feature_name": "Fwd Header Length",
+        "importance": 0.028437934835262448
+      },
+      {
+        "feature_index": 3,
+        "feature_name": "Total Fwd Packet",
+        "importance": 0.027150813503874667
+      }
+    ]
+  },
+  "class_distribution": {
+    "before_smote": {
+      "Audio": 152,
+      "Background": 26,
+      "Bruteforce": 800,
+      "DoS": 800,
+      "Information Gathering": 800,
+      "Mirai": 789,
+      "Text": 167,
+      "Video": 696
+    },
+    "after_smote": {
+      "Audio": 800,
+      "Background": 800,
+      "Bruteforce": 800,
+      "DoS": 800,
+      "Information Gathering": 800,
+      "Mirai": 800,
+      "Text": 800,
+      "Video": 800
+    },
+    "smote_improvements": {
+      "Audio": "152 \u2192 800 samples (+426.3%)",
+      "Background": "26 \u2192 800 samples (+2976.9%)",
+      "Bruteforce": "800 \u2192 800 samples (+0.0%)",
+      "DoS": "800 \u2192 800 samples (+0.0%)",
+      "Information Gathering": "800 \u2192 800 samples (+0.0%)",
+      "Mirai": "789 \u2192 800 samples (+1.4%)",
+      "Text": "167 \u2192 800 samples (+379.0%)",
+      "Video": "696 \u2192 800 samples (+14.9%)"
+    }
+  },
+  "data_quality": {
+    "target_variable": "Traffic Type",
+    "classes": [
+      "Audio",
+      "Background",
+      "Bruteforce",
+      "DoS",
+      "Information Gathering",
+      "Mirai",
+      "Text",
+      "Video"
+    ],
+    "train_test_split": {
+      "train_samples": 6400,
+      "test_samples": 1058,
+      "train_features": 15,
+      "test_features": 15
+    }
+  }
+}

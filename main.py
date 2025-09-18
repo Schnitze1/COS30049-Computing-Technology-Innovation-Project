@@ -9,7 +9,7 @@ from evaluation.calc_eval_metrics import evaluate_models, print_results, calcula
 DATA_PATH = 'data_preprocessing/output'
 
 def load_dataset(npz_path: str = f'{DATA_PATH}/processed_data.npz'):
-    data = np.load(npz_path)
+    data = np.load(npz_path, allow_pickle=True)
     X_train_unsupervised = data['X_train_unSMOTE']  # Original X_train before SMOTE for unsupervised learning
     X_train = data['X_train']
     X_test = data['X_test']
