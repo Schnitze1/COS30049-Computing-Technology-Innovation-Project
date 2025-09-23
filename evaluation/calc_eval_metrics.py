@@ -10,7 +10,7 @@ from sklearn.metrics import (
     roc_auc_score, confusion_matrix, classification_report,
     precision_recall_fscore_support
 )
-from sklearn.cluster import KMeans
+from sklearn.cluster import KMeans, DBSCAN
 from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
 from sklearn.pipeline import Pipeline
 
@@ -27,24 +27,29 @@ def kmeans_eval(km_model, X, y_true):
     Evaluate K-means clustering for multiclass using majority vote
     Uses the already trained K-means model
     """
-    clusters = km_model.predict(X)
+    if isinstance(km_model, KMeans):
+        clusters = km_model.predict(X)
+    else:
+        # DBSCAN labels may include -1 for noise
+        clusters = km_model.fit_predict(X)
 
-    # Majority vote: for each cluster, pick the most frequent y_true
+    # Majority vote: for each observed cluster label, pick the most frequent y_true
     mapping = {}
-    # Try to get n_clusters from estimator; fall back to unique cluster count
-    est, _ = _get_underlying_kmeans(km_model)
-    n_clusters = est.n_clusters if est is not None else int(np.max(clusters) + 1)
-    for c in range(n_clusters):
+    # Default to overall majority class (used for noise or empty clusters)
+    overall_vals, overall_counts = np.unique(y_true, return_counts=True)
+    default_label = int(overall_vals[np.argmax(overall_counts)])
+
+    unique_clusters = np.unique(clusters)
+    for c in unique_clusters:
         idx = np.where(clusters == c)[0]
         if len(idx) == 0:
-            mapping[c] = 0  # default if empty
+            mapping[c] = default_label
             continue
-        # pick the mode label inside cluster c
         vals, counts = np.unique(y_true[idx], return_counts=True)
-        mapping[c] = int(vals[np.argmax(counts)])
+        mapping[c] = int(vals[np.argmax(counts)]) if len(vals) else default_label
 
-    # convert clusters -> predicted labels
-    y_pred = np.array([mapping[c] for c in clusters], dtype=int)
+    # convert clusters -> predicted labels (handle unseen labels like -1)
+    y_pred = np.array([mapping.get(c, default_label) for c in clusters], dtype=int)
 
     return y_pred, mapping
 
@@ -59,8 +64,12 @@ def evaluate_models(models: Dict[str, object], X_test, y_test, n_classes: int) -
         
         # Detect KMeans or Pipeline-with-KMeans only (variants removed)
         is_kmeans = isinstance(model, KMeans) or (isinstance(model, Pipeline) and 'kmeans' in getattr(model, 'named_steps', {}))
-        if is_kmeans:  # Unsupervised: clustering with multiclass evaluation
-            y_pred = model.predict(X_test)
+        is_dbscan = isinstance(model, DBSCAN) or (isinstance(model, Pipeline) and 'dbscan' in getattr(model, 'named_steps', {}))
+        if is_kmeans or is_dbscan:  # Unsupervised: clustering with multiclass evaluation
+            if is_kmeans:
+                y_pred = model.predict(X_test)
+            else:
+                y_pred = model.fit_predict(X_test)
             
             # Traditional clustering metrics
             # Access inertia from underlying KMeans if inside pipeline
@@ -165,8 +174,9 @@ def calculate_label_metrics(models: Dict[str, object], X_test, y_test, traffic_t
     for model_name, model in models.items():
         # Predict Traffic Type for this model
         is_kmeans = isinstance(model, KMeans) or (isinstance(model, Pipeline) and 'kmeans' in getattr(model, 'named_steps', {}))
-        if is_kmeans:
-            # Map clusters to class indices using majority vote
+        is_dbscan = isinstance(model, DBSCAN) or (isinstance(model, Pipeline) and 'dbscan' in getattr(model, 'named_steps', {}))
+        if is_kmeans or is_dbscan:
+            # Map clusters to class indices using majority vote (handles DBSCAN noise as well)
             y_pred_type, _ = kmeans_eval(model, X_test, y_test)
         else:
             y_pred_type = model.predict(X_test)

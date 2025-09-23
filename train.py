@@ -5,6 +5,7 @@ from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
+from sklearn.cluster import DBSCAN
 
 def train_models(X_train_supervised, y_train_supervised, X_train_unsupervised, n_classes: int) -> Dict[str, object]:
     """
@@ -30,11 +31,12 @@ def train_models(X_train_supervised, y_train_supervised, X_train_unsupervised, n
         ),
         # Baseline KMeans with k = num classes (e.g., 8 traffic types → k=8)
         'kmeans': KMeans(n_clusters=n_classes, random_state=42, n_init=20),
+        'dbscan': DBSCAN(eps=0.5, min_samples=5),
     }
 
     for name, model in models.items():
         print(f"Training {name}...")
-        if name == 'kmeans':  # Unsupervised: clustering - use unsmote data
+        if name == 'kmeans' or name == 'dbscan':  # Unsupervised: clustering - use unsmote data
             print(f"  Using unsmote data: {X_train_unsupervised.size} samples")
             model.fit(X_train_unsupervised)
         else:  # Supervised: classification - use SMOTE data

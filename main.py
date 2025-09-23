@@ -61,7 +61,7 @@ def run_multiclass_classification():
     else:
         print(f"Loaded {len(models)} cached models: {list(models.keys())}")
         # Verify we have all expected models
-        expected_models = ['random_forest', 'mlp', 'kmeans']
+        expected_models = ['random_forest', 'mlp', 'kmeans', 'dbscan']
         missing_models = [m for m in expected_models if m not in models]
         if missing_models:
             print(f"Missing models: {missing_models}. Training missing models...")
@@ -84,9 +84,9 @@ def run_multiclass_classification():
     paths = export_multiclass_all(results, traffic_types, label_metrics, out_dir='evaluation_reports')
 
     # Kmean plots for limitations explanation
-    if 'kmeans' in models:
+    if 'kmeans' in models or 'dbscan' in models:
         try:
-            kmeans = models['kmeans']
+            kmeans = models['kmeans'] if 'kmeans' in models else models['dbscan']
             y_clusters = kmeans.predict(X_test)
             
             # Plot PCA by cluster and cluster-label heatmap
