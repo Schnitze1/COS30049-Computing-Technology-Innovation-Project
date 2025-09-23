@@ -45,9 +45,9 @@ def run_multiclass_classification():
     traffic_types = metadata['label_encoder'].classes_
     n_classes = len(traffic_types)
     
-    print(f"Supervised dataset (SMOTE): {X_train_supervised.shape[0]} training samples")
-    print(f"Unsupervised dataset (unsmote): {X_train_unsupervised.shape[0]} training samples")
-    print(f"Test dataset: {X_test.shape[0]} test samples")
+    print(f"Supervised dataset (SMOTE): {X_train_supervised.size} training samples")
+    print(f"Unsupervised dataset (unsmote): {X_train_unsupervised.size} training samples")
+    print(f"Test dataset: {X_test.size} test samples")
     print(f"Traffic Types: {traffic_types}")
     
     # Try to load cached models first

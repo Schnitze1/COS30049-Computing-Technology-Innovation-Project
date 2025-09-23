@@ -35,10 +35,10 @@ def train_models(X_train_supervised, y_train_supervised, X_train_unsupervised, n
     for name, model in models.items():
         print(f"Training {name}...")
         if name == 'kmeans':  # Unsupervised: clustering - use unsmote data
-            print(f"  Using unsmote data: {X_train_unsupervised.shape[0]} samples")
+            print(f"  Using unsmote data: {X_train_unsupervised.size} samples")
             model.fit(X_train_unsupervised)
         else:  # Supervised: classification - use SMOTE data
-            print(f"  Using SMOTE data: {X_train_supervised.shape[0]} samples")
+            print(f"  Using SMOTE data: {X_train_supervised.size} samples")
             model.fit(X_train_supervised, y_train_supervised)
 
     return models
