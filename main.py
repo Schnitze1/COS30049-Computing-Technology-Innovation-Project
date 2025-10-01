@@ -1,6 +1,5 @@
-
 import os
-from evaluation.create_reports import export_multiclass_all, plot_kmeans_pca_scatter, plot_cluster_label_heatmap
+from evaluation.create_reports import export_reports
 import numpy as np
 import pickle
 from utils.model_io import save_models, load_models
@@ -80,22 +79,12 @@ def run_multiclass_classification():
     label_metrics = calculate_label_metrics(models, X_test, y_test, traffic_types)
     print_label_results(label_metrics)
     
-    # Export the overall summary
-    paths = export_multiclass_all(results, traffic_types, label_metrics, out_dir='evaluation_reports')
-
-    # Kmean plots for limitations explanation
-    if 'kmeans' in models or 'dbscan' in models:
-        try:
-            kmeans = models['kmeans'] if 'kmeans' in models else models['dbscan']
-            y_clusters = kmeans.predict(X_test)
-            
-            # Plot PCA by cluster and cluster-label heatmap
-            pca_paths = plot_kmeans_pca_scatter(X_test, y_test, y_clusters, traffic_types, out_dir='evaluation_reports/clustering')
-            # Drop the label-colored PCA from the returned dict to keep focus tight
-            paths['KMeans PCA by Cluster'] = pca_paths['KMeans PCA by Cluster']
-            paths['Cluster-Label Heatmap'] = plot_cluster_label_heatmap(y_clusters, y_test, traffic_types, out_dir='evaluation_reports/clustering')
-        except Exception as e:
-            print(f"Warning: Could not create K-Means PCA plots: {e}")
+    # Export the overall summary (multiclass + clustering)
+    paths = export_reports(
+        results, traffic_types, label_metrics,
+        models=models, X=X_test, y_true=y_test,
+        clustering_out_dir='evaluation_reports/clustering'
+    )
 
     print('\nMulticlass classification artifacts saved to:')
     for artifact_name, path in paths.items():

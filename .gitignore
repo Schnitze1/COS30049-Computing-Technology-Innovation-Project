@@ -44,7 +44,7 @@ ehthumbs.db
 Thumbs.db
 
 # Cache and temporary files
-cache/
+# cache/
 *.tmp
 *.temp
 
@@ -52,12 +52,12 @@ cache/
 *.log
 
 # Model files
-*.joblib
+# *.joblib
 *.keras
 *.h5
-*.pkl
+# *.pkl
 
 # Data files
-*.npz
+# *.npz
 # *.csv
 # *.json

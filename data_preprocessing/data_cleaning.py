@@ -158,7 +158,7 @@ top_feature_indices = importance_df.index[:15].to_list()            # transforme
 top_feature_names   = importance_df["feature_name"].head(15).to_list()
 
 # Save feature importance analysis to CSV
-importance_df.to_csv(f'{eda_dir}/feature_importance_analysis.csv', index=False)
+importance_df.to_csv(f'{output_dir}/feature_importance_analysis.csv', index=False)
 
 # Select features using indices (works with NumPy arrays)
 X_train = X_train[:, top_feature_indices]
@@ -174,7 +174,7 @@ plt.xlabel('Feature Importance')
 plt.title('Top 15 Most Important Features')
 plt.gca().invert_yaxis()
 plt.tight_layout()
-plt.savefig(f'{eda_dir}/feature_importance_top15.png', dpi=300, bbox_inches='tight')
+plt.savefig(f'{output_dir}/feature_importance_top15.png', dpi=300, bbox_inches='tight')
 # plt.show()
 
 # ---------------------------------------------------------- #
@@ -199,7 +199,7 @@ for ax in axes[len(plot_cols):]:
     ax.set_visible(False)
 
 plt.tight_layout()
-plt.savefig(f"{eda_dir}/feature_boxplots_top15.png", dpi=300, bbox_inches="tight")
+plt.savefig(f"{output_dir}/feature_boxplots_top15.png", dpi=300, bbox_inches="tight")
 
 
 # =========================================================== #
@@ -306,7 +306,7 @@ log_data = {
 
 # Save log
 import json
-with open(f'{eda_dir}/data_preprocessing_log.json', 'w') as f:
+with open(f'{output_dir}/data_preprocessing_log.json', 'w') as f:
     json.dump(log_data, f, indent=2)
 
 print(f"Preprocessing log saved to: {output_dir}/data_preprocessing_log.json")
