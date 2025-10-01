@@ -200,30 +200,30 @@ Dataset split and classes
 - Test: 15,795 samples
 - Traffic types (8): Audio, Background, Bruteforce, DoS, Information Gathering, Mirai, Text, Video
 
-Multiclass summary (accuracy / weighted F1)
-- Random Forest: 0.9335 / 0.9335 (ROC AUC OvR: 0.9756)
-- MLP: 0.8746 / 0.8816 (ROC AUC OvR: 0.9813)
-- K-means: 0.4169 / 0.3403 (Silhouette: 0.4414, CH: 387.42, DB: 0.8752, Inertia: 22560.51)
-- DBSCAN: 0.6182 / 0.6077 (Silhouette: 0.3606, CH: 35.57, DB: 1.5915)
+Multiclass (accuracy / weighted F1)
 
-Binary label metrics (Malicious vs Benign)
-- Random Forest: Acc 0.9630 / Precision 0.9712 / Recall 0.9630 / F1 0.9671
-- MLP: Acc 0.9430 / Precision 0.9768 / Recall 0.9210 / F1 0.9481
-- K-means: Acc 0.6201 / Precision 0.7396 / Recall 0.5059 / F1 0.6008
-- DBSCAN: Acc 0.7217 / Precision 0.9081 / Recall 0.5647 / F1 0.6964
+| Model | Accuracy | Weighted F1 | Extra |
+|---|---:|---:|---|
+| Random Forest | 0.9335 | 0.9335 | AUC 0.9756 |
+| MLP | 0.8746 | 0.8816 | AUC 0.9813 |
+| K-means | 0.4169 | 0.3403 | Sil 0.4414, CH 387.42, DB 0.8752, Inertia 22560.51 |
+| DBSCAN | 0.6182 | 0.6077 | Sil 0.3606, CH 35.57, DB 1.5915 |
 
-Artifacts generated
-- CSV
-  - evaluation_reports/multiclass/multiclass_metrics_summary.csv
-  - evaluation_reports/binary_label/label_from_type_metrics.csv
-- Visuals
-  - evaluation_reports/multiclass/multiclass_metrics_comparison.png
-  - evaluation_reports/multiclass/confusion_matrices.png
-  - evaluation_reports/multiclass/per_class_metrics_random_forest.png
-  - evaluation_reports/multiclass/per_class_metrics_mlp.png
-  - evaluation_reports/multiclass/per_class_metrics_kmeans.png
-  - evaluation_reports/multiclass/per_class_metrics_dbscan.png
-  - evaluation_reports/clustering/kmeans_pca_by_cluster.png
-  - evaluation_reports/clustering/kmeans_cluster_label_heatmap.png
-  - evaluation_reports/clustering/dbscan_pca_by_cluster.png
-  - evaluation_reports/clustering/dbscan_cluster_label_heatmap.png
+Binary (Malicious vs Benign)
+
+| Model | Accuracy | Precision | Recall | F1 |
+|---|---:|---:|---:|---:|
+| Random Forest | 0.9630 | 0.9712 | 0.9630 | 0.9671 |
+| MLP | 0.9430 | 0.9768 | 0.9210 | 0.9481 |
+| K-means | 0.6201 | 0.7396 | 0.5059 | 0.6008 |
+| DBSCAN | 0.7217 | 0.9081 | 0.5647 | 0.6964 |
+
+### Reports glossary
+- See `evaluation_reports/` (multiclass, binary_label, clustering) for CSVs and visualizations.
+- `multiclass/multiclass_metrics_summary.csv`: Per-model multiclass metrics (accuracy, precision/recall/F1 weighted, AUC where applicable).
+- `binary_label/label_from_type_metrics.csv`: Per-model binary metrics (Malicious vs Benign): accuracy, precision, recall, F1.
+- `multiclass/multiclass_metrics_comparison.png`: Bar chart comparing key multiclass metrics across models.
+- `multiclass/confusion_matrices.png`: Confusion matrices per model (rows = true, cols = predicted).
+- `multiclass/per_class_metrics_*.png`: Per-class precision, recall, F1 for a given model.
+- `clustering/*_pca_by_cluster.png`: PCA 2D scatter colored by cluster IDs.
+- `clustering/*_cluster_label_heatmap.png`: Cluster-vs-true-label contingency heatmap.
